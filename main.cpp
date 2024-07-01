@@ -255,7 +255,6 @@ void Maze::move_up() {
 int main() {
     std::cout << "Hello, World!" << std::endl;
     Maze maze;
-    maze.randomize_maze();
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
 
     // TEMPORARY FOR USER INPUT
