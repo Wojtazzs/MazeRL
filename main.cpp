@@ -67,7 +67,7 @@ public:
 void Maze::draw() {
     for (int x = 0; x < MAZE_SIZE; x++) {
         for (int y = 0; y < MAZE_SIZE; y++) {
-            if (this->obj[x][y] == Wall){
+            if (this->obj[x][y] == Wall or this->obj[x][y] == Map_wall){
                 DrawRectangle((RECT_SIZE*x)+15, (RECT_SIZE*y)+15, RECT_WIDTH, RECT_WIDTH, WHITE);
             }
             else if (this->obj[x][y] == Player){
@@ -91,8 +91,31 @@ enum Direction {
     Bottom = 3,
 };
 
+class DoneSides {
+public:
+    bool Left = false;
+    bool Right = false;
+    bool Top = false;
+    bool Bottom = false;
+    bool all() {
+        if (this->Left and this->Right and this->Top and this->Bottom) {
+            return true;
+        }
+        return false;
+    }
+    void clear() {
+        this->Left = false;
+        this->Right = false;
+        this->Top = false;
+        this->Bottom = false;
+    }
+};
+
 bool has_adjecent(BlockType (*arr)[MAZE_SIZE][MAZE_SIZE], Position pos) {
     int number_of_adjecent = 0;
+    if ((*arr)[pos.x][pos.y] == Map_wall) {
+        return true;
+    }
     if ((*arr)[pos.x-1][pos.y] == Empty) {
         number_of_adjecent += 1;
     }
@@ -102,7 +125,7 @@ bool has_adjecent(BlockType (*arr)[MAZE_SIZE][MAZE_SIZE], Position pos) {
     if ((*arr)[pos.x][pos.y-1] == Empty) {
         number_of_adjecent += 1;
     }
-    if ((*arr)[pos.x+1][pos.y+1] == Empty) {
+    if ((*arr)[pos.x][pos.y+1] == Empty) {
         number_of_adjecent += 1;
     }
     if (number_of_adjecent > 1) {
@@ -146,41 +169,50 @@ void Maze::randomize_maze() {
             this->obj[x][y] = Wall;
         }
     }
-
+    this->obj[end_x][end_y] = Empty;
 
     // Startujesz na end_x, end_y
-    Position pos;
+    int changed;
+    Position pos{};
     stack<Position> position;
     position.push({.x=end_x, .y=end_y});
+    DoneSides done;
+    done.clear();
     while (!position.empty()) {
         pos = position.top();
-        for (int dir = 0; dir < 4; dir++) {
-            if (dir == Left) {
-                if (!has_adjecent(&this->obj, {pos.x-1, pos.y})) {
-                    this->obj[pos.x-1][pos.y] = Empty;
-                    position.push({pos.x-1, pos.y});
-                    break;
-                }
-                if (!has_adjecent(&this->obj, {pos.x+1, pos.y})) {
-                    this->obj[pos.x+1][pos.y] = Empty;
-                    position.push({pos.x+1, pos.y});
-                    break;
-                }
-                if (!has_adjecent(&this->obj, {pos.x, pos.y-1})) {
-                    this->obj[pos.x][pos.y-1] = Empty;
-                    position.push({pos.x, pos.y-1});
-                    break;
-                }
-                if (!has_adjecent(&this->obj, {pos.x, pos.y+1})) {
-                    this->obj[pos.x][pos.y+1] = Empty;
-                    position.push({pos.x, pos.y+1});
-                    break;
-                }
-                position.pop();
-            }
+        side = sides(gen);
+        if (side == Left) {
+            if (pos.x > 1 and !has_adjecent(&this->obj, {pos.x - 1, pos.y})) {
+                this->obj[pos.x - 1][pos.y] = Empty;
+                position.push({pos.x - 1, pos.y});
+                done.clear();
+            } else done.Left = true;
+
+        } else if (side == Right) {
+            if (pos.x < 18 and !has_adjecent(&this->obj, {pos.x + 1, pos.y})) {
+                this->obj[pos.x + 1][pos.y] = Empty;
+                position.push({pos.x + 1, pos.y});
+                done.clear();
+            } else done.Right = true;
+
+        } else if (side == Top) {
+            if (pos.y > 1 and !has_adjecent(&this->obj, {pos.x, pos.y-1})) {
+                this->obj[pos.x][pos.y-1] = Empty;
+                position.push({pos.x, pos.y-1});
+                done.clear();
+            } else done.Top = true;
+
+        } else if (side == Bottom) {
+            if (pos.y < 18 and !has_adjecent(&this->obj, {pos.x, pos.y + 1})) {
+                this->obj[pos.x][pos.y + 1] = Empty;
+                position.push({pos.x, pos.y + 1});
+                done.clear();
+            } else done.Bottom = true;
+        }
+        if (done.all()) {
+            position.pop();
         }
     }
-
 }
 
 
@@ -223,7 +255,6 @@ void Maze::move_up() {
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
-
     Maze maze;
     maze.randomize_maze();
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
