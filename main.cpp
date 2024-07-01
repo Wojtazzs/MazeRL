@@ -1,7 +1,6 @@
 
 #include <iostream>
 #include <stack>
-#include <string.h>
 #include <random>
 
 #include "raylib/raylib.h"
@@ -13,50 +12,20 @@ const int RECT_WIDTH = 30;
 
 using namespace std;
 
-class Node {
-public:
-    int x;
-    int y;
-};
-
 enum BlockType {
     Empty = 0,
     Wall = 1,
     Player = 2,
-
-    //FOR GENERATION
-    Visited = 3,
     Map_wall = 4,
     End = 5,
-    Start = 6,
 };
 
 class Maze {
 public:
-    BlockType obj[MAZE_SIZE][MAZE_SIZE];
-    int player[2];
+    BlockType obj[MAZE_SIZE][MAZE_SIZE]{};
+    int player[2]{};
     Maze() {
-        memset(player, 0, sizeof(player));
-        player[0] = 2;
-        player[1] = 2;
-
-        memset(obj, 0, sizeof(obj));
-        obj[1][1] = Wall;
-        obj[player[0]][player[1]] = Player;
-
-        // TO CHANGE FOR AUTO GENERATED MAZE------------------------------------------------------------------------
-        obj[0][1] = Wall;
-        obj[1][2] = Wall;
-        obj[2][3] = Wall;
-        obj[3][3] = Wall;
-        obj[4][3] = Wall;
-        for (int i = 0; i < MAZE_SIZE; i++) {
-            obj[i][0] = Wall;
-            obj[i][19] = Wall;
-            obj[0][i] = Wall;
-            obj[19][i] = Wall;
-        }
-        // ---------------------------------------------------------------------------------------------------------
+        this->randomize_maze();
     }
     void draw();
     void move_right();
@@ -176,13 +145,13 @@ void Maze::randomize_maze() {
     }
     this->obj[end_x][end_y] = End;
 
-    // Startujesz na end_x, end_y
-    int changed;
     Position pos{};
     stack<Position> position;
     position.push({.x=end_x, .y=end_y});
+
     DoneSides done;
     done.clear();
+
     while (!position.empty()) {
         pos = position.top();
         side = sides(gen);
