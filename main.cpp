@@ -2,9 +2,8 @@
 #include <iostream>
 #include <stack>
 #include <string.h>
-#include <experimental/random>
+#include <random>
 
-#include "external/glfw/src/internal.h"
 #include "raylib/raylib.h"
 
 const int WINDOW_SIZE = 800;
@@ -15,9 +14,9 @@ const int RECT_WIDTH = 30;
 using namespace std;
 
 class Node {
-    public:
-        int x;
-        int y;
+public:
+    int x;
+    int y;
 };
 
 enum BlockType {
@@ -31,38 +30,38 @@ enum BlockType {
 };
 
 class Maze {
-    public:
-        BlockType obj[MAZE_SIZE][MAZE_SIZE];
-        int player[2];
-        Maze() {
-            memset(player, 0, sizeof(player));
-            player[0] = 2;
-            player[1] = 2;
+public:
+    BlockType obj[MAZE_SIZE][MAZE_SIZE];
+    int player[2];
+    Maze() {
+        memset(player, 0, sizeof(player));
+        player[0] = 2;
+        player[1] = 2;
 
-            memset(obj, 0, sizeof(obj));
-            obj[1][1] = Wall;
-            obj[player[0]][player[1]] = Player;
+        memset(obj, 0, sizeof(obj));
+        obj[1][1] = Wall;
+        obj[player[0]][player[1]] = Player;
 
-            // TO CHANGE FOR AUTO GENERATED MAZE------------------------------------------------------------------------
-            obj[0][1] = Wall;
-            obj[1][2] = Wall;
-            obj[2][3] = Wall;
-            obj[3][3] = Wall;
-            obj[4][3] = Wall;
-            for (int i = 0; i < MAZE_SIZE; i++) {
-                obj[i][0] = Wall;
-                obj[i][19] = Wall;
-                obj[0][i] = Wall;
-                obj[19][i] = Wall;
-            }
-            // ---------------------------------------------------------------------------------------------------------
+        // TO CHANGE FOR AUTO GENERATED MAZE------------------------------------------------------------------------
+        obj[0][1] = Wall;
+        obj[1][2] = Wall;
+        obj[2][3] = Wall;
+        obj[3][3] = Wall;
+        obj[4][3] = Wall;
+        for (int i = 0; i < MAZE_SIZE; i++) {
+            obj[i][0] = Wall;
+            obj[i][19] = Wall;
+            obj[0][i] = Wall;
+            obj[19][i] = Wall;
         }
-        void draw();
-        void move_right();
-        void move_left();
-        void move_up();
-        void move_down();
-        void randomize_maze();
+        // ---------------------------------------------------------------------------------------------------------
+    }
+    void draw();
+    void move_right();
+    void move_left();
+    void move_up();
+    void move_down();
+    void randomize_maze();
 };
 
 void Maze::draw() {
@@ -80,9 +79,9 @@ void Maze::draw() {
 }
 
 struct Position {
-    public:
-        int x;
-        int y;
+public:
+    int x;
+    int y;
 };
 
 enum Direction {
@@ -113,21 +112,26 @@ bool has_adjecent(BlockType (*arr)[MAZE_SIZE][MAZE_SIZE], Position pos) {
 }
 
 void Maze::randomize_maze() {
-    int side = experimental::randint(0, 3);
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<int> sides(0, 3);
+    uniform_int_distribution<int> start(0, 19);
+
+    int side = sides(gen);
 
     int end_x = 0, end_y = 0;
 
     if (side == Left) {
         end_x = 0;
-        end_y = experimental::randint(0, MAZE_SIZE-1);
+        end_y = start(gen);
     } else if (side == Right) {
         end_x = 19;
-        end_y = experimental::randint(0, MAZE_SIZE-1);
+        end_y = start(gen);
     } else if (side == Top) {
-        end_x = experimental::randint(0, MAZE_SIZE-1);
+        end_x = start(gen);
         end_y = 19;
     } else if (side == Bottom) {
-        end_x = experimental::randint(0, MAZE_SIZE-1);
+        end_x = start(gen);
         end_y = 0;
     } else {
         cout << "WTF!\n";
@@ -137,6 +141,7 @@ void Maze::randomize_maze() {
         for (int y = 0; y < MAZE_SIZE; y++) {
             if (x == 0 || y == 0 || x == 19 || y == 19) {
                 this->obj[x][y] = Map_wall;
+                continue;
             }
             this->obj[x][y] = Wall;
         }
@@ -152,9 +157,26 @@ void Maze::randomize_maze() {
         for (int dir = 0; dir < 4; dir++) {
             if (dir == Left) {
                 if (!has_adjecent(&this->obj, {pos.x-1, pos.y})) {
+                    this->obj[pos.x-1][pos.y] = Empty;
                     position.push({pos.x-1, pos.y});
                     break;
                 }
+                if (!has_adjecent(&this->obj, {pos.x+1, pos.y})) {
+                    this->obj[pos.x+1][pos.y] = Empty;
+                    position.push({pos.x+1, pos.y});
+                    break;
+                }
+                if (!has_adjecent(&this->obj, {pos.x, pos.y-1})) {
+                    this->obj[pos.x][pos.y-1] = Empty;
+                    position.push({pos.x, pos.y-1});
+                    break;
+                }
+                if (!has_adjecent(&this->obj, {pos.x, pos.y+1})) {
+                    this->obj[pos.x][pos.y+1] = Empty;
+                    position.push({pos.x, pos.y+1});
+                    break;
+                }
+                position.pop();
             }
         }
     }
@@ -202,7 +224,6 @@ void Maze::move_up() {
 int main() {
     std::cout << "Hello, World!" << std::endl;
 
-    constexpr int random_seed = 42;
     Maze maze;
     maze.randomize_maze();
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
