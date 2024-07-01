@@ -27,6 +27,8 @@ enum BlockType {
     //FOR GENERATION
     Visited = 3,
     Map_wall = 4,
+    End = 5,
+    Start = 6,
 };
 
 class Maze {
@@ -73,6 +75,9 @@ void Maze::draw() {
             else if (this->obj[x][y] == Player){
                 //DrawRectangle((RECT_SIZE*x)+15, (RECT_SIZE*y)+15, RECT_WIDTH, RECT_WIDTH, WHITE);
                 DrawCircle((RECT_SIZE*x)+30, (RECT_SIZE*y)+30, (float)RECT_WIDTH/3, RED);
+            }
+            else if (this->obj[x][y] == End) {
+                DrawCircle((RECT_SIZE*x)+30, (RECT_SIZE*y)+30, (float)RECT_WIDTH/4, YELLOW);
             }
         }
     }
@@ -138,7 +143,7 @@ void Maze::randomize_maze() {
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<int> sides(0, 3);
-    uniform_int_distribution<int> start(0, 19);
+    uniform_int_distribution<int> start(1, 18);
 
     int side = sides(gen);
 
@@ -169,7 +174,7 @@ void Maze::randomize_maze() {
             this->obj[x][y] = Wall;
         }
     }
-    this->obj[end_x][end_y] = Empty;
+    this->obj[end_x][end_y] = End;
 
     // Startujesz na end_x, end_y
     int changed;
@@ -213,6 +218,19 @@ void Maze::randomize_maze() {
             position.pop();
         }
     }
+
+    // Spawn player randomly
+    for (int x = 0; x < MAZE_SIZE; x++) {
+        for (int y = 0; y < MAZE_SIZE; y++) {
+            if (x == 0 || y == 0 || x == 19 || y == 19) continue;
+            if (this->obj[x][y] == Empty and !has_adjecent(&this->obj, {x, y})) {
+                this->player[0] = x;
+                this->player[1] = y;
+                this->obj[player[0]][player[1]] = Player;
+                return;
+            }
+        }
+    }
 }
 
 
@@ -221,7 +239,10 @@ void Maze::move_right() {
         obj[this->player[0]][this->player[1]] = Empty;
         player[0] += 1;
         obj[this->player[0]][this->player[1]] = Player;
-
+    }
+    if(this->obj[this->player[0]+1][this->player[1]] == End) {
+        cout << "WICTORY!\n";
+        this->randomize_maze();
     }
 }
 
@@ -230,7 +251,10 @@ void Maze::move_left() {
         obj[this->player[0]][this->player[1]] = Empty;
         player[0] -= 1;
         obj[this->player[0]][this->player[1]] = Player;
-
+    }
+    if(this->obj[this->player[0]-1][this->player[1]] == End) {
+        cout << "WICTORY!\n";
+        this->randomize_maze();
     }
 }
 
@@ -239,7 +263,10 @@ void Maze::move_down() {
         obj[this->player[0]][this->player[1]] = Empty;
         player[1] += 1;
         obj[this->player[0]][this->player[1]] = Player;
-
+    }
+    if(this->obj[this->player[0]][this->player[1]+1] == End) {
+        cout << "WICTORY!\n";
+        this->randomize_maze();
     }
 }
 
@@ -248,7 +275,10 @@ void Maze::move_up() {
         obj[this->player[0]][this->player[1]] = Empty;
         player[1] -= 1;
         obj[this->player[0]][this->player[1]] = Player;
-
+    }
+    if(this->obj[this->player[0]][this->player[1]-1] == End) {
+        cout << "WICTORY!\n";
+        this->randomize_maze();
     }
 }
 
@@ -260,7 +290,7 @@ int main() {
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
 
     // TEMPORARY FOR USER INPUT
-    SetTargetFPS(240);
+    SetTargetFPS(30);
 
     while (!WindowShouldClose()) {
 
