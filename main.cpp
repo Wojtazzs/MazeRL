@@ -1,8 +1,10 @@
 
 #include <iostream>
+#include <stack>
 #include <string.h>
 #include <experimental/random>
 
+#include "external/glfw/src/internal.h"
 #include "raylib/raylib.h"
 
 const int WINDOW_SIZE = 800;
@@ -25,6 +27,7 @@ enum BlockType {
 
     //FOR GENERATION
     Visited = 3,
+    Map_wall = 4,
 };
 
 class Maze {
@@ -76,17 +79,85 @@ void Maze::draw() {
     }
 }
 
+struct Position {
+    public:
+        int x;
+        int y;
+};
+
+enum Direction {
+    Left = 0,
+    Right = 1,
+    Top = 2,
+    Bottom = 3,
+};
+
+bool has_adjecent(BlockType (*arr)[MAZE_SIZE][MAZE_SIZE], Position pos) {
+    int number_of_adjecent = 0;
+    if ((*arr)[pos.x-1][pos.y] == Empty) {
+        number_of_adjecent += 1;
+    }
+    if ((*arr)[pos.x+1][pos.y] == Empty) {
+        number_of_adjecent += 1;
+    }
+    if ((*arr)[pos.x][pos.y-1] == Empty) {
+        number_of_adjecent += 1;
+    }
+    if ((*arr)[pos.x+1][pos.y+1] == Empty) {
+        number_of_adjecent += 1;
+    }
+    if (number_of_adjecent > 1) {
+        return true;
+    }
+    return false;
+}
+
 void Maze::randomize_maze() {
-    int start_x = experimental::randint(0, MAZE_SIZE-1);
-    int start_y = experimental::randint(0, MAZE_SIZE-1);
+    int side = experimental::randint(0, 3);
+
+    int end_x = 0, end_y = 0;
+
+    if (side == Left) {
+        end_x = 0;
+        end_y = experimental::randint(0, MAZE_SIZE-1);
+    } else if (side == Right) {
+        end_x = 19;
+        end_y = experimental::randint(0, MAZE_SIZE-1);
+    } else if (side == Top) {
+        end_x = experimental::randint(0, MAZE_SIZE-1);
+        end_y = 19;
+    } else if (side == Bottom) {
+        end_x = experimental::randint(0, MAZE_SIZE-1);
+        end_y = 0;
+    } else {
+        cout << "WTF!\n";
+    }
 
     for (int x = 0; x < MAZE_SIZE; x++) {
         for (int y = 0; y < MAZE_SIZE; y++) {
+            if (x == 0 || y == 0 || x == 19 || y == 19) {
+                this->obj[x][y] = Map_wall;
+            }
             this->obj[x][y] = Wall;
         }
     }
 
 
+    // Startujesz na end_x, end_y
+    Position pos;
+    stack<Position> position;
+    position.push({.x=end_x, .y=end_y});
+    while (!position.empty()) {
+        pos = position.top();
+        for (int dir = 0; dir < 4; dir++) {
+            if (dir == Left) {
+                if (!has_adjecent(&this->obj, {pos.x-1, pos.y})) {
+                    position.push({pos.x-1, pos.y});
+                    break;
+                }
+            }
+        }
+    }
 
 }
 
