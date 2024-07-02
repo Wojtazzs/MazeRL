@@ -87,7 +87,7 @@ public:
 
 bool has_adjecent(BlockType (*arr)[MAZE_SIZE][MAZE_SIZE], Position pos) {
     int number_of_adjecent = 0;
-    if ((*arr)[pos.x][pos.y] == Map_wall) {
+    if ((*arr)[pos.x][pos.y] == Map_wall or (*arr)[pos.x][pos.y] == End) {
         return true;
     }
     if ((*arr)[pos.x-1][pos.y] == Empty) {
