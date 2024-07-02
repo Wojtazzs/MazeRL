@@ -5,10 +5,10 @@
 
 #include "raylib/raylib.h"
 
-const int WINDOW_SIZE = 800;
+const int WINDOW_SIZE = 900;
 const int MAZE_SIZE = 20;
-const int RECT_SIZE = (WINDOW_SIZE-10)/MAZE_SIZE;
-const int RECT_WIDTH = 30;
+const int RECT_SIZE = WINDOW_SIZE/MAZE_SIZE;
+const int RECT_WIDTH = RECT_SIZE;
 
 using namespace std;
 
@@ -39,14 +39,14 @@ void Maze::draw() {
     for (int x = 0; x < MAZE_SIZE; x++) {
         for (int y = 0; y < MAZE_SIZE; y++) {
             if (this->obj[x][y] == Wall or this->obj[x][y] == Map_wall){
-                DrawRectangle((RECT_SIZE*x)+15, (RECT_SIZE*y)+15, RECT_WIDTH, RECT_WIDTH, WHITE);
+                DrawRectangle(RECT_SIZE*x, RECT_SIZE*y, RECT_WIDTH, RECT_WIDTH, WHITE);
             }
             else if (this->obj[x][y] == Player){
                 //DrawRectangle((RECT_SIZE*x)+15, (RECT_SIZE*y)+15, RECT_WIDTH, RECT_WIDTH, WHITE);
-                DrawCircle((RECT_SIZE*x)+30, (RECT_SIZE*y)+30, (float)RECT_WIDTH/3, RED);
+                DrawCircle((RECT_SIZE*x)+(RECT_SIZE/2), (RECT_SIZE*y)+(RECT_SIZE/2), (float)RECT_WIDTH/3, RED);
             }
             else if (this->obj[x][y] == End) {
-                DrawCircle((RECT_SIZE*x)+30, (RECT_SIZE*y)+30, (float)RECT_WIDTH/4, YELLOW);
+                DrawCircle((RECT_SIZE*x)+(RECT_SIZE/2), (RECT_SIZE*y)+(RECT_SIZE/2), (float)RECT_WIDTH/4, YELLOW);
             }
         }
     }
@@ -112,7 +112,7 @@ void Maze::randomize_maze() {
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<int> sides(0, 3);
-    uniform_int_distribution<int> start(1, 18);
+    uniform_int_distribution<int> start(1, MAZE_SIZE-2);
 
     int side = sides(gen);
 
@@ -122,11 +122,11 @@ void Maze::randomize_maze() {
         end_x = 0;
         end_y = start(gen);
     } else if (side == Right) {
-        end_x = 19;
+        end_x = MAZE_SIZE-1;
         end_y = start(gen);
     } else if (side == Top) {
         end_x = start(gen);
-        end_y = 19;
+        end_y = MAZE_SIZE-1;
     } else if (side == Bottom) {
         end_x = start(gen);
         end_y = 0;
@@ -136,7 +136,7 @@ void Maze::randomize_maze() {
 
     for (int x = 0; x < MAZE_SIZE; x++) {
         for (int y = 0; y < MAZE_SIZE; y++) {
-            if (x == 0 || y == 0 || x == 19 || y == 19) {
+            if (x == 0 || y == 0 || x == MAZE_SIZE-1 || y == MAZE_SIZE-1) {
                 this->obj[x][y] = Map_wall;
                 continue;
             }
@@ -163,7 +163,7 @@ void Maze::randomize_maze() {
             } else done.Left = true;
 
         } else if (side == Right) {
-            if (pos.x < 18 and !has_adjecent(&this->obj, {pos.x + 1, pos.y})) {
+            if (pos.x < MAZE_SIZE-1 and !has_adjecent(&this->obj, {pos.x + 1, pos.y})) {
                 this->obj[pos.x + 1][pos.y] = Empty;
                 position.push({pos.x + 1, pos.y});
                 done.clear();
@@ -177,7 +177,7 @@ void Maze::randomize_maze() {
             } else done.Top = true;
 
         } else if (side == Bottom) {
-            if (pos.y < 18 and !has_adjecent(&this->obj, {pos.x, pos.y + 1})) {
+            if (pos.y < MAZE_SIZE-1 and !has_adjecent(&this->obj, {pos.x, pos.y + 1})) {
                 this->obj[pos.x][pos.y + 1] = Empty;
                 position.push({pos.x, pos.y + 1});
                 done.clear();
@@ -191,7 +191,7 @@ void Maze::randomize_maze() {
     // Spawn player randomly
     for (int x = 0; x < MAZE_SIZE; x++) {
         for (int y = 0; y < MAZE_SIZE; y++) {
-            if (x == 0 || y == 0 || x == 19 || y == 19) continue;
+            if (x == 0 || y == 0 || x == MAZE_SIZE-1 || y == MAZE_SIZE-1) continue;
             if (this->obj[x][y] == Empty and !has_adjecent(&this->obj, {x, y})) {
                 this->player[0] = x;
                 this->player[1] = y;
@@ -200,6 +200,7 @@ void Maze::randomize_maze() {
             }
         }
     }
+    abort();
 }
 
 
