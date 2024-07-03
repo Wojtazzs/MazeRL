@@ -1,5 +1,7 @@
 #include "./maze.hpp"
+#include <algorithm>
 #include <cmath>
+#include <tuple>
 
 class QLearning {
  private:
@@ -11,6 +13,33 @@ class QLearning {
     const Maze& m_maze;  // Maze should outlive QLearning
     //            [number of statesx]  [number of actions]
     double QMatrix[MAZE_SIZE*MAZE_SIZE][4];
+
+    static int PositionFromState(int x, int y) {
+        return x*MAZE_SIZE + y;
+    }
+    std::tuple<int, int> UpdatePosition(int x, int y, int action) {
+        std::tuple<int, int> new_position;
+        switch (action) {
+            case 0:
+                new_position = std::make_tuple(x, std::max(0, y - 1));
+                break;
+            case 1:
+                new_position = std::make_tuple(x, std::min(MAZE_SIZE - 1, y + 1));
+                break;
+            case 2:
+                new_position = std::make_tuple(std::max(0, x - 1), y);
+                break;
+            case 3:
+                new_position = std::make_tuple(std::min(MAZE_SIZE - 1, x + 1), y);
+                break;
+        }
+        return (this->m_maze.obj[get<0>(new_position)][get<1>(new_position)] == 0) ? new_position : std::make_tuple(x, y);
+    }
+
+    int TakeAction(int state) {
+        // TODO(11jolek11): Implement
+        return 0;
+    }
 
  public:
      QLearning(const Maze& maze, double lr, int no_of_epochs,
