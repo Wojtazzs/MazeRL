@@ -75,6 +75,10 @@ void Maze::randomize_maze() {
             this->obj[x][y] = Wall;
         }
     }
+
+    this->maze_end[0] = end_x;
+    this->maze_end[1] = end_y;
+
     this->obj[end_x][end_y] = End;
 
     Position pos{};

@@ -55,6 +55,7 @@ class Maze {
  public:
     BlockType obj[MAZE_SIZE][MAZE_SIZE]{};
     int player[2]{};
+    int maze_end[2]{};
     Maze() {
         this->randomize_maze();
     }
