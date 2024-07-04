@@ -5,7 +5,7 @@
 #include "raylib/raylib.h"
 
 const int WINDOW_SIZE = 900;
-const int MAZE_SIZE = 4;
+const int MAZE_SIZE = 20;
 const int RECT_SIZE = WINDOW_SIZE/MAZE_SIZE;
 const int RECT_WIDTH = RECT_SIZE;
 

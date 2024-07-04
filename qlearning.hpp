@@ -41,21 +41,21 @@ class QLearning {
         switch (action) {
             case 0:
                 new_position = std::make_tuple(x, std::max(0, y - 1));
-                this->m_maze.move_left();
+                // this->m_maze.move_left();
             case 1:
                 new_position = std::make_tuple(x, std::min(MAZE_SIZE - 1, y + 1));
-                this->m_maze.move_right();
+                // this->m_maze.move_right();
             case 2:
                 new_position = std::make_tuple(std::max(0, x - 1), y);
-                this->m_maze.move_up();
+                // this->m_maze.move_up();
             case 3:
                 new_position = std::make_tuple(std::min(MAZE_SIZE - 1, x + 1), y);
-                this->m_maze.move_down();
+                // this->m_maze.move_down();
         }
 
         auto[return_x, return_y] = new_position;
-        // return (this->m_maze.obj[return_x][return_y] == Empty) ? new_position : std::make_tuple(x, y);
-        return new_position;
+        return (this->m_maze.obj[return_x][return_y] == Empty) ? new_position : std::make_tuple(x, y);
+        // return new_position;
     }
 
      QLearning(Maze& maze, int repeat, int no_of_epochs,
