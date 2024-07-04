@@ -148,7 +148,7 @@ void Maze::move_right() {
     }
     if(this->obj[this->player[0]+1][this->player[1]] == End) {
         std::cout << "VICTORY!\n";
-        this->randomize_maze();
+        // this->randomize_maze();
     }
 }
 
@@ -160,7 +160,7 @@ void Maze::move_left() {
     }
     if(this->obj[this->player[0]-1][this->player[1]] == End) {
         std::cout << "VICTORY!\n";
-        this->randomize_maze();
+        // this->randomize_maze();
     }
 }
 
@@ -172,7 +172,7 @@ void Maze::move_down() {
     }
     if(this->obj[this->player[0]][this->player[1]+1] == End) {
         std::cout << "VICTORY!\n";
-        this->randomize_maze();
+        // this->randomize_maze();
     }
 }
 
@@ -184,7 +184,7 @@ void Maze::move_up() {
     }
     if(this->obj[this->player[0]][this->player[1]-1] == End) {
         std::cout << "VICTORY!\n";
-        this->randomize_maze();
+        // this->randomize_maze();
     }
 }
 
