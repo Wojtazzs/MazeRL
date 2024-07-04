@@ -1,31 +1,74 @@
-#include "maze.hpp"
+#include "./qlearning.hpp"
+#include <unistd.h>
+
+// int main() {
+//     std::cout << "Hello, World!" << std::endl;
+//     Maze maze;
+//     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
+//
+//     // TEMPORARY FOR USER INPUT
+//     SetTargetFPS(30);
+//
+//     while (!WindowShouldClose()) {
+//
+//         if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
+//             maze.move_right();
+//         }
+//         if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
+//             maze.move_left();
+//         }
+//         if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
+//             maze.move_up();
+//         }
+//         if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
+//             maze.move_down();
+//         }
+//
+//         BeginDrawing();
+//         ClearBackground(BLACK);
+//         maze.draw();
+//         EndDrawing();
+//     }
+//
+//     CloseWindow();
+//
+//     return 0;
+// }
+
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
     Maze maze;
+    QLearning q(maze, 100, 1000, 0.9, 0.1, 0.1);
+    q.Train();
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
-
+    sleep(3);
     // TEMPORARY FOR USER INPUT
     SetTargetFPS(30);
 
+    int position_x = maze.player[0];
+    int position_y = maze.player[1];
+    int state = 0;
+
+    // FIXME(11jolek11): Fix draw!
     while (!WindowShouldClose()) {
-
-        if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
-            maze.move_right();
-        }
-        if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-            maze.move_left();
-        }
-        if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
-            maze.move_up();
-        }
-        if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
-            maze.move_down();
-        }
-
         BeginDrawing();
         ClearBackground(BLACK);
+        sleep(2);
         maze.draw();
+
+        state = q.PositionFromState(
+                position_x,
+                position_y);
+        int action =  std::distance(q.QMatrix[state], std::max_element(q.QMatrix[state], q.QMatrix[state] + MAZE_SIZE));
+
+        int old_pos_x = position_x;
+        int old_pos_y = position_y;
+        auto[position_x, position_y] = q.UpdatePosition(old_pos_x, old_pos_y, action);
+        maze.player[0] = position_x;
+        maze.player[1] = position_y;
+        std::cout << "Refresh \n";
+        // auto[maze.player[0], maze.player[1]] = q.UpdatePosition(position_x, position_y, action);
         EndDrawing();
     }
 
@@ -33,3 +76,4 @@ int main() {
 
     return 0;
 }
+
