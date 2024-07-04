@@ -1,4 +1,5 @@
 #include "./qlearning.hpp"
+#include <string>
 #include <unistd.h>
 
 // int main() {
@@ -39,8 +40,9 @@
 int main() {
     std::cout << "Hello, World!" << std::endl;
     Maze maze;
-    QLearning q(maze, 100, 1000, 0.9, 0.1, 0.1);
+    QLearning q(maze, 100, 100000, 0.9, 0.1, 0.1);
     q.Train();
+    q.pprint();
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
     sleep(3);
     // TEMPORARY FOR USER INPUT
@@ -57,6 +59,7 @@ int main() {
         sleep(2);
         maze.draw();
 
+        std::cout << "Refresh # New player position: [X:" + std::to_string(maze.player[0]) + " Y:" + std::to_string(maze.player[1]) + "] \n";
         state = q.PositionFromState(
                 position_x,
                 position_y);
@@ -65,9 +68,10 @@ int main() {
         int old_pos_x = position_x;
         int old_pos_y = position_y;
         auto[position_x, position_y] = q.UpdatePosition(old_pos_x, old_pos_y, action);
+        maze.obj[maze.player[0]][maze.player[1]] = Empty;
         maze.player[0] = position_x;
         maze.player[1] = position_y;
-        std::cout << "Refresh \n";
+        maze.obj[maze.player[0]][maze.player[1]] = Player;
         // auto[maze.player[0], maze.player[1]] = q.UpdatePosition(position_x, position_y, action);
         EndDrawing();
     }

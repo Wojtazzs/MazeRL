@@ -5,7 +5,7 @@
 #include "raylib/raylib.h"
 
 const int WINDOW_SIZE = 900;
-const int MAZE_SIZE = 20;
+const int MAZE_SIZE = 4;
 const int RECT_SIZE = WINDOW_SIZE/MAZE_SIZE;
 const int RECT_WIDTH = RECT_SIZE;
 
@@ -65,5 +65,13 @@ class Maze {
     void move_up();
     void move_down();
     void randomize_maze();
+    void pprint() {
+        for (int i = 0; i < MAZE_SIZE; i++) {
+            for (int j = 0; j < MAZE_SIZE; j++) {
+                std::cout << this->obj[i][j] << " ";
+            }
+            std::cout << "\n";
+        }
+    }
 };
 

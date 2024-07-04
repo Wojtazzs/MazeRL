@@ -1,6 +1,7 @@
 #include "./maze.hpp"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <tuple>
 #include <random>
 
@@ -19,13 +20,20 @@ class QLearning {
     int TakeAction(int state);
 
  public:
-
-
     Maze& m_maze;  // Maze should outlive QLearning
     //            [number of states]  [number of actions]
     double QMatrix[MAZE_SIZE*MAZE_SIZE][4];
     static int PositionFromState(int x, int y) {
         return x*MAZE_SIZE + y;
+    }
+
+    void pprint() {
+        for (int i = 0; i < MAZE_SIZE*MAZE_SIZE; i++) {
+            for (int j = 0; j < 4; j++) {
+                std::cout << this->QMatrix[i][j] << " ";
+            }
+            std::cout << "\n";
+        }
     }
 
     std::tuple<int, int> UpdatePosition(int x, int y, int action) {
@@ -34,23 +42,20 @@ class QLearning {
             case 0:
                 new_position = std::make_tuple(x, std::max(0, y - 1));
                 this->m_maze.move_left();
-                break;
             case 1:
                 new_position = std::make_tuple(x, std::min(MAZE_SIZE - 1, y + 1));
                 this->m_maze.move_right();
-                break;
             case 2:
                 new_position = std::make_tuple(std::max(0, x - 1), y);
                 this->m_maze.move_up();
-                break;
             case 3:
                 new_position = std::make_tuple(std::min(MAZE_SIZE - 1, x + 1), y);
                 this->m_maze.move_down();
-                break;
         }
 
         auto[return_x, return_y] = new_position;
-        return (this->m_maze.obj[return_x][return_y] == 0) ? new_position : std::make_tuple(x, y);
+        // return (this->m_maze.obj[return_x][return_y] == Empty) ? new_position : std::make_tuple(x, y);
+        return new_position;
     }
 
      QLearning(Maze& maze, int repeat, int no_of_epochs,

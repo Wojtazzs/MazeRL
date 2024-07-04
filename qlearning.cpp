@@ -1,4 +1,6 @@
 #include "./qlearning.hpp"
+#include <iostream>
+#include <string>
 
 int QLearning::TakeAction(int state) {
     std::random_device rand_dev;
@@ -31,11 +33,12 @@ void QLearning::Train() {
             position_y = new_position_y;
 
             if (position_x == this->m_maze.maze_end[0] || position_y == this->m_maze.maze_end[1]) {
+                std::cout << "Epoch: " + std::to_string(epoch) + " Rep: " + std::to_string(i) + "\n";
                 break;
             }
         }
 
-        this->m_maze.randomize_maze();
+        // this->m_maze.randomize_maze();
     }
 }
 
