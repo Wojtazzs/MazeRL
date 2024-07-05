@@ -17,12 +17,11 @@ class QLearning {
     // std::mt19937 generator(rand_dev());
     // std::uniform_real_distribution<double> distribution(0.0, 1.0);
 
-    int TakeAction(int state);
-
  public:
+    int TakeAction(int state);
     Maze& m_maze;  // Maze should outlive QLearning
     //            [number of states]  [number of actions]
-    double QMatrix[MAZE_SIZE*MAZE_SIZE][4];
+    double QMatrix[MAZE_SIZE*MAZE_SIZE][4] = { 0.0 };
     static int PositionFromState(int x, int y) {
         return x*MAZE_SIZE + y;
     }
@@ -42,15 +41,19 @@ class QLearning {
             case 0:
                 new_position = std::make_tuple(x, std::max(0, y - 1));
                 // this->m_maze.move_left();
+                std::cout << "L\n";
             case 1:
                 new_position = std::make_tuple(x, std::min(MAZE_SIZE - 1, y + 1));
                 // this->m_maze.move_right();
+                std::cout << "R\n";
             case 2:
                 new_position = std::make_tuple(std::max(0, x - 1), y);
                 // this->m_maze.move_up();
+                std::cout << "U\n";
             case 3:
                 new_position = std::make_tuple(std::min(MAZE_SIZE - 1, x + 1), y);
                 // this->m_maze.move_down();
+                std::cout << "D\n";
         }
 
         auto[return_x, return_y] = new_position;
