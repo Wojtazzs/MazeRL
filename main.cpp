@@ -1,4 +1,5 @@
 #include "./qlearning.hpp"
+#include <iostream>
 #include <string>
 #include <unistd.h>
 
@@ -40,7 +41,7 @@
 int main() {
     std::cout << "Hello, World!" << std::endl;
     Maze maze;
-    QLearning q(maze, 100, 100000, 0.9, 0.1, 0.1);
+    QLearning q(maze, 1, 10000, 0.9, 0.1, 0.1);
     q.Train();
     q.pprint();
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
@@ -56,15 +57,19 @@ int main() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-        sleep(2);
+        sleep(1);
         maze.draw();
 
-        std::cout << "Refresh # New player position: [X:" + std::to_string(maze.player[0]) + " Y:" + std::to_string(maze.player[1]) + "] \n";
+        std::cout << "Refresh # New player position: [X:" + std::to_string(maze.player[0]) + " Y:" + std::to_string(maze.player[1]) + "] New state: ";
         state = q.PositionFromState(
                 position_x,
                 position_y);
-        int action =  std::distance(q.QMatrix[state], std::max_element(q.QMatrix[state], q.QMatrix[state] + MAZE_SIZE));
+        std::cout << std::to_string(state);
+        // int action =  std::distance(q.QMatrix[state], std::max_element(q.QMatrix[state], q.QMatrix[state] + MAZE_SIZE));
+        int action = q.TakeAction(state);
+        std::cout << " Action: " + std::to_string(action);
 
+        std::cout << " Q: " + std::to_string(q.QMatrix[state][action]) + "\n";
         int old_pos_x = position_x;
         int old_pos_y = position_y;
         auto[position_x, position_y] = q.UpdatePosition(old_pos_x, old_pos_y, action);
