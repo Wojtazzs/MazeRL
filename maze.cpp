@@ -137,6 +137,8 @@ void Maze::randomize_maze() {
         }
     }
     abort();
+
+    this->pprint();
 }
 
 

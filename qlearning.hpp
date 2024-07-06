@@ -41,23 +41,23 @@ class QLearning {
             case 0:
                 new_position = std::make_tuple(x, std::max(0, y - 1));
                 // this->m_maze.move_left();
-                std::cout << "L\n";
+                // std::cout << "D";
             case 1:
                 new_position = std::make_tuple(x, std::min(MAZE_SIZE - 1, y + 1));
                 // this->m_maze.move_right();
-                std::cout << "R\n";
+                // std::cout << "U";
             case 2:
                 new_position = std::make_tuple(std::max(0, x - 1), y);
                 // this->m_maze.move_up();
-                std::cout << "U\n";
+                // std::cout << "L";
             case 3:
                 new_position = std::make_tuple(std::min(MAZE_SIZE - 1, x + 1), y);
                 // this->m_maze.move_down();
-                std::cout << "D\n";
+                // std::cout << "R";
         }
 
         auto[return_x, return_y] = new_position;
-        return (this->m_maze.obj[return_x][return_y] == Empty) ? new_position : std::make_tuple(x, y);
+        return (this->m_maze.obj[return_x][return_y] == Empty /*|| this->m_maze.obj[return_x][return_y] ==  End*/) ? new_position : std::make_tuple(x, y);
         // return new_position;
     }
 

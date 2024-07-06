@@ -1,4 +1,5 @@
 #include "./qlearning.hpp"
+#include <climits>
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -41,7 +42,7 @@
 int main() {
     std::cout << "Hello, World!" << std::endl;
     Maze maze;
-    QLearning q(maze, 1, 10000, 0.9, 0.1, 0.1);
+    QLearning q(maze, 100, 100000, 0.9, 0.1, 0.2);
     q.Train();
     q.pprint();
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
@@ -49,30 +50,28 @@ int main() {
     // TEMPORARY FOR USER INPUT
     SetTargetFPS(30);
 
-    int position_x = maze.player[0];
-    int position_y = maze.player[1];
+    int position_x = INT_MIN;
+    int position_y = INT_MIN;
     int state = 0;
 
     // FIXME(11jolek11): Fix draw!
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-        sleep(1);
+        sleep(3);
         maze.draw();
 
-        std::cout << "Refresh # New player position: [X:" + std::to_string(maze.player[0]) + " Y:" + std::to_string(maze.player[1]) + "] New state: ";
+        std::cout << "\nRefresh # New player position: [X:" + std::to_string(maze.player[0]) + " Y:" + std::to_string(maze.player[1]) + "] New state: ";
         state = q.PositionFromState(
-                position_x,
-                position_y);
+                maze.player[0],
+                maze.player[1]);
         std::cout << std::to_string(state);
         // int action =  std::distance(q.QMatrix[state], std::max_element(q.QMatrix[state], q.QMatrix[state] + MAZE_SIZE));
         int action = q.TakeAction(state);
         std::cout << " Action: " + std::to_string(action);
 
         std::cout << " Q: " + std::to_string(q.QMatrix[state][action]) + "\n";
-        int old_pos_x = position_x;
-        int old_pos_y = position_y;
-        auto[position_x, position_y] = q.UpdatePosition(old_pos_x, old_pos_y, action);
+        auto[position_x, position_y] = q.UpdatePosition(maze.player[0], maze.player[1], action);
         maze.obj[maze.player[0]][maze.player[1]] = Empty;
         maze.player[0] = position_x;
         maze.player[1] = position_y;
