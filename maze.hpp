@@ -17,7 +17,6 @@ enum BlockType {
     End = 5,
 };
 
-
 struct Position {
  public:
     int x;
@@ -56,6 +55,7 @@ class Maze {
  public:
     BlockType obj[MAZE_SIZE][MAZE_SIZE]{};
     int player[2]{};
+    int maze_start[2]{};
     int maze_end[2]{};
     Maze() {
         this->randomize_maze();
@@ -73,6 +73,18 @@ class Maze {
             }
             std::cout << "\n";
         }
+    }
+    bool is_goal(int x, int y) {
+        return x == maze_end[0] && y == maze_end[1];
+    }
+
+    bool is_valid(int x, int y) {
+        if (x < 0 || x >= MAZE_SIZE || y < 0 || y >= MAZE_SIZE) {
+            return false;
+        }
+
+        // return this->obj[x][y] != Wall || this->obj[x][y] != Map_wall;
+        return this->obj[x][y] == Empty || this->obj[x][y] == End;
     }
 };
 

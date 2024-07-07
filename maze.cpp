@@ -131,6 +131,8 @@ void Maze::randomize_maze() {
             if (this->obj[x][y] == Empty and !has_adjecent(&this->obj, {x, y})) {
                 this->player[0] = x;
                 this->player[1] = y;
+                this->maze_start[0] = x;
+                this->maze_start[1] = y;
                 this->obj[player[0]][player[1]] = Player;
                 return;
             }
@@ -147,6 +149,7 @@ void Maze::move_right() {
         obj[this->player[0]][this->player[1]] = Empty;
         player[0] += 1;
         obj[this->player[0]][this->player[1]] = Player;
+        std::cout << "R\n";
     }
     if(this->obj[this->player[0]+1][this->player[1]] == End) {
         std::cout << "VICTORY!\n";
@@ -159,6 +162,7 @@ void Maze::move_left() {
         obj[this->player[0]][this->player[1]] = Empty;
         player[0] -= 1;
         obj[this->player[0]][this->player[1]] = Player;
+        std::cout << "L\n";
     }
     if(this->obj[this->player[0]-1][this->player[1]] == End) {
         std::cout << "VICTORY!\n";
@@ -171,6 +175,7 @@ void Maze::move_down() {
         obj[this->player[0]][this->player[1]] = Empty;
         player[1] += 1;
         obj[this->player[0]][this->player[1]] = Player;
+        std::cout << "D\n";
     }
     if(this->obj[this->player[0]][this->player[1]+1] == End) {
         std::cout << "VICTORY!\n";
@@ -183,6 +188,7 @@ void Maze::move_up() {
         obj[this->player[0]][this->player[1]] = Empty;
         player[1] -= 1;
         obj[this->player[0]][this->player[1]] = Player;
+        std::cout << "U\n";
     }
     if(this->obj[this->player[0]][this->player[1]-1] == End) {
         std::cout << "VICTORY!\n";
