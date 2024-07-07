@@ -1,283 +1,100 @@
-
+#include "./qlearning.hpp"
+#include <climits>
 #include <iostream>
-#include <stack>
-#include <random>
+#include <string>
+#include <unistd.h>
 
-#include "raylib/raylib.h"
-
-const int WINDOW_SIZE = 900;
-const int MAZE_SIZE = 20;
-const int RECT_SIZE = WINDOW_SIZE/MAZE_SIZE;
-const int RECT_WIDTH = RECT_SIZE;
-
-using namespace std;
-
-enum BlockType {
-    Empty = 0,
-    Wall = 1,
-    Player = 2,
-    Map_wall = 4,
-    End = 5,
-};
-
-class Maze {
-public:
-    BlockType obj[MAZE_SIZE][MAZE_SIZE]{};
-    int player[2]{};
-    Maze() {
-        this->randomize_maze();
+State get_next_state(State s, Actions a) {
+    State s_next = s;
+    switch (a) {
+        case UP:
+            s_next.x -= 1;
+            break;
+        case DOWN:
+            s_next.x += 1;
+            break;
+        case LEFT:
+            s_next.y -= 1;
+            break;
+        case RIGHT:
+            s_next.y += 1;
+            break;
     }
-    void draw();
-    void move_right();
-    void move_left();
-    void move_up();
-    void move_down();
-    void randomize_maze();
-};
 
-void Maze::draw() {
-    for (int x = 0; x < MAZE_SIZE; x++) {
-        for (int y = 0; y < MAZE_SIZE; y++) {
-            if (this->obj[x][y] == Wall or this->obj[x][y] == Map_wall){
-                DrawRectangle(RECT_SIZE*x, RECT_SIZE*y, RECT_WIDTH, RECT_WIDTH, WHITE);
+    return s_next;
+}
+
+void train_agent(Maze& maze, Agent& ql, int episodes) {
+    srand((unsigned)time(0));
+    for (int episode = 0; episode < episodes; ++episode) {
+        State s = { maze.maze_start[0], maze.maze_start[1] };
+        while (!maze.is_goal(s.x, s.y)) {
+            Actions a = ql.get_action(s);
+            State s_next = get_next_state(s, a);
+            if (!maze.is_valid(s_next.x, s_next.y)) {
+                s_next = s;  // if move not OK, stay
             }
-            else if (this->obj[x][y] == Player){
-                //DrawRectangle((RECT_SIZE*x)+15, (RECT_SIZE*y)+15, RECT_WIDTH, RECT_WIDTH, WHITE);
-                DrawCircle((RECT_SIZE*x)+(RECT_SIZE/2), (RECT_SIZE*y)+(RECT_SIZE/2), (float)RECT_WIDTH/3, RED);
-            }
-            else if (this->obj[x][y] == End) {
-                DrawCircle((RECT_SIZE*x)+(RECT_SIZE/2), (RECT_SIZE*y)+(RECT_SIZE/2), (float)RECT_WIDTH/4, YELLOW);
-            }
+            double reward = maze.is_goal(s_next.x, s_next.y) ? 100.0 : -1.0;
+            ql.update(s, a, s_next, reward);
+            s = s_next;
         }
     }
 }
 
-struct Position {
-public:
-    int x;
-    int y;
-};
-
-enum Direction {
-    Left = 0,
-    Right = 1,
-    Top = 2,
-    Bottom = 3,
-};
-
-class DoneSides {
-public:
-    bool Left = false;
-    bool Right = false;
-    bool Top = false;
-    bool Bottom = false;
-    bool all() {
-        if (this->Left and this->Right and this->Top and this->Bottom) {
-            return true;
+void test_agent(Maze& maze, Agent& ql) {
+    State s = { maze.maze_start[0], maze.maze_start[1] };
+    std::cout << "(" << s.x << ", " << s.y << ") -> ";
+    State temp;
+    while (!maze.is_goal(s.x, s.y)) {
+        Actions a = ql.get_action(s);
+        temp = get_next_state(s, a);
+        if (maze.is_valid(temp.x, temp.y)) {
+            s = temp;
+        } else {
+            continue;
         }
-        return false;
-    }
-    void clear() {
-        this->Left = false;
-        this->Right = false;
-        this->Top = false;
-        this->Bottom = false;
-    }
-};
-
-bool has_adjecent(BlockType (*arr)[MAZE_SIZE][MAZE_SIZE], Position pos) {
-    int number_of_adjecent = 0;
-    if ((*arr)[pos.x][pos.y] == Map_wall or (*arr)[pos.x][pos.y] == End) {
-        return true;
-    }
-    if ((*arr)[pos.x-1][pos.y] == Empty) {
-        number_of_adjecent += 1;
-    }
-    if ((*arr)[pos.x+1][pos.y] == Empty) {
-        number_of_adjecent += 1;
-    }
-    if ((*arr)[pos.x][pos.y-1] == Empty) {
-        number_of_adjecent += 1;
-    }
-    if ((*arr)[pos.x][pos.y+1] == Empty) {
-        number_of_adjecent += 1;
-    }
-    if (number_of_adjecent > 1) {
-        return true;
-    }
-    return false;
-}
-
-void Maze::randomize_maze() {
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<int> sides(0, 3);
-    uniform_int_distribution<int> start(1, MAZE_SIZE-2);
-
-    int side = sides(gen);
-
-    int end_x = 0, end_y = 0;
-
-    if (side == Left) {
-        end_x = 0;
-        end_y = start(gen);
-    } else if (side == Right) {
-        end_x = MAZE_SIZE-1;
-        end_y = start(gen);
-    } else if (side == Top) {
-        end_x = start(gen);
-        end_y = MAZE_SIZE-1;
-    } else if (side == Bottom) {
-        end_x = start(gen);
-        end_y = 0;
-    } else {
-        cout << "WTF!\n";
-    }
-
-    for (int x = 0; x < MAZE_SIZE; x++) {
-        for (int y = 0; y < MAZE_SIZE; y++) {
-            if (x == 0 || y == 0 || x == MAZE_SIZE-1 || y == MAZE_SIZE-1) {
-                this->obj[x][y] = Map_wall;
-                continue;
-            }
-            this->obj[x][y] = Wall;
+        std::cout << "(" << s.x << ", " << s.y << ") -> ";
+        if (maze.is_goal(s.x, s.y)) {
+            std::cout << "Goal Reached!" << std::endl;
         }
     }
-    this->obj[end_x][end_y] = End;
-
-    Position pos{};
-    stack<Position> position;
-    position.push({.x=end_x, .y=end_y});
-
-    DoneSides done;
-    done.clear();
-
-    while (!position.empty()) {
-        pos = position.top();
-        side = sides(gen);
-        if (side == Left) {
-            if (pos.x > 1 and !has_adjecent(&this->obj, {pos.x - 1, pos.y})) {
-                this->obj[pos.x - 1][pos.y] = Empty;
-                position.push({pos.x - 1, pos.y});
-                done.clear();
-            } else done.Left = true;
-
-        } else if (side == Right) {
-            if (pos.x < MAZE_SIZE-1 and !has_adjecent(&this->obj, {pos.x + 1, pos.y})) {
-                this->obj[pos.x + 1][pos.y] = Empty;
-                position.push({pos.x + 1, pos.y});
-                done.clear();
-            } else done.Right = true;
-
-        } else if (side == Top) {
-            if (pos.y > 1 and !has_adjecent(&this->obj, {pos.x, pos.y-1})) {
-                this->obj[pos.x][pos.y-1] = Empty;
-                position.push({pos.x, pos.y-1});
-                done.clear();
-            } else done.Top = true;
-
-        } else if (side == Bottom) {
-            if (pos.y < MAZE_SIZE-1 and !has_adjecent(&this->obj, {pos.x, pos.y + 1})) {
-                this->obj[pos.x][pos.y + 1] = Empty;
-                position.push({pos.x, pos.y + 1});
-                done.clear();
-            } else done.Bottom = true;
-        }
-        if (done.all()) {
-            position.pop();
-        }
-    }
-
-    // Spawn player randomly
-    for (int x = 0; x < MAZE_SIZE; x++) {
-        for (int y = 0; y < MAZE_SIZE; y++) {
-            if (x == 0 || y == 0 || x == MAZE_SIZE-1 || y == MAZE_SIZE-1) continue;
-            if (this->obj[x][y] == Empty and !has_adjecent(&this->obj, {x, y})) {
-                this->player[0] = x;
-                this->player[1] = y;
-                this->obj[player[0]][player[1]] = Player;
-                return;
-            }
-        }
-    }
-    abort();
 }
-
-
-void Maze::move_right() {
-    if(this->obj[this->player[0]+1][this->player[1]] == Empty) {
-        obj[this->player[0]][this->player[1]] = Empty;
-        player[0] += 1;
-        obj[this->player[0]][this->player[1]] = Player;
-    }
-    if(this->obj[this->player[0]+1][this->player[1]] == End) {
-        cout << "WICTORY!\n";
-        this->randomize_maze();
-    }
-}
-
-void Maze::move_left() {
-    if(this->obj[this->player[0]-1][this->player[1]] == Empty) {
-        obj[this->player[0]][this->player[1]] = Empty;
-        player[0] -= 1;
-        obj[this->player[0]][this->player[1]] = Player;
-    }
-    if(this->obj[this->player[0]-1][this->player[1]] == End) {
-        cout << "WICTORY!\n";
-        this->randomize_maze();
-    }
-}
-
-void Maze::move_down() {
-    if(this->obj[this->player[0]][this->player[1]+1] == Empty) {
-        obj[this->player[0]][this->player[1]] = Empty;
-        player[1] += 1;
-        obj[this->player[0]][this->player[1]] = Player;
-    }
-    if(this->obj[this->player[0]][this->player[1]+1] == End) {
-        cout << "WICTORY!\n";
-        this->randomize_maze();
-    }
-}
-
-void Maze::move_up() {
-    if(this->obj[this->player[0]][this->player[1]-1] == Empty) {
-        obj[this->player[0]][this->player[1]] = Empty;
-        player[1] -= 1;
-        obj[this->player[0]][this->player[1]] = Player;
-    }
-    if(this->obj[this->player[0]][this->player[1]-1] == End) {
-        cout << "WICTORY!\n";
-        this->randomize_maze();
-    }
-}
-
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
     Maze maze;
+    Agent solver(0.1, 0.9, 0.1);
+    train_agent(maze, solver, 10000);
+    State s = { maze.maze_start[0], maze.maze_start[1] };
+    State temp;
+    maze.pprint();
+
+    std::cout << "START " + std::to_string(s.x) + "x" + std::to_string(s.y) + "\n";
+    std::cout << "END   " + std::to_string(maze.maze_end[0]) + "x" + std::to_string(maze.maze_end[1]) + "\n";
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
 
     // TEMPORARY FOR USER INPUT
     SetTargetFPS(30);
-
+    std::cout << "(" << s.x << ", " << s.y << ") -> ";
     while (!WindowShouldClose()) {
-
-        if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
-            maze.move_right();
-        }
-        if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-            maze.move_left();
-        }
-        if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
-            maze.move_up();
-        }
-        if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
-            maze.move_down();
-        }
-
+        // sleep(1);
         BeginDrawing();
         ClearBackground(BLACK);
+        State old;
+
+        if (!maze.is_goal(s.x, s.y)) {
+            Actions a = solver.get_action(s);
+            temp = get_next_state(s, a);
+            if (maze.is_valid(temp.x, temp.y)) {
+                old = s;
+                s = temp;
+                maze.obj[old.x][old.y] = Player;
+                std::cout << "(" << s.x << ", " << s.y << ") -> ";
+                if (maze.is_goal(s.x, s.y)) {
+                    std::cout << "Goal Reached!" << std::endl;
+                }
+            }
+        }
         maze.draw();
         EndDrawing();
     }
@@ -286,3 +103,4 @@ int main() {
 
     return 0;
 }
+
