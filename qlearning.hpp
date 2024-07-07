@@ -1,6 +1,5 @@
 #include "./maze.hpp"
 #include <algorithm>
-#include <cmath>
 #include <iostream>
 #include <tuple>
 #include <random>
@@ -20,6 +19,8 @@ class Agent {
     double gamma = 0.9;
     double epsilon = 0.1;
 
+    Agent(double alpha, double gamma, double epsilon):
+        alpha(alpha), gamma(gamma), epsilon(epsilon) {}
     // Agent() {
         // Init QMatrix
         // for (int i = 0; i < MAZE_SIZE; ++i)

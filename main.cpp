@@ -54,7 +54,7 @@ void test_agent(Maze& maze, Agent& ql) {
 int main() {
     std::cout << "Hello, World!" << std::endl;
     Maze maze;
-    Agent solver;
+    Agent solver(0.1, 0.9, 0.1);
     train_agent(maze, solver, 1000);
     State s = { maze.maze_start[0], maze.maze_start[1] };
     State temp;
@@ -64,35 +64,22 @@ int main() {
     std::cout << "END   " + std::to_string(maze.maze_end[0]) + "x" + std::to_string(maze.maze_end[1]) + "\n";
     InitWindow(WINDOW_SIZE, WINDOW_SIZE, "Maze");
 
-    sleep(2);
     // TEMPORARY FOR USER INPUT
     SetTargetFPS(30);
     std::cout << "(" << s.x << ", " << s.y << ") -> ";
     while (!WindowShouldClose()) {
-        sleep(2);
+        // sleep(1);
         BeginDrawing();
         ClearBackground(BLACK);
+        State old;
 
         if (!maze.is_goal(s.x, s.y)) {
             Actions a = solver.get_action(s);
             temp = get_next_state(s, a);
             if (maze.is_valid(temp.x, temp.y)) {
+                old = s;
                 s = temp;
-                maze.obj[s.x][s.y] = Player;
-                // switch (a) {
-                //     case UP:
-                //         maze.move_up();
-                //         break;
-                //     case DOWN:
-                //         maze.move_down();
-                //         break;
-                //     case LEFT:
-                //         maze.move_left();
-                //         break;
-                //     case RIGHT:
-                //         maze.move_right();
-                //         break;
-                // }
+                maze.obj[old.x][old.y] = Player;
                 std::cout << "(" << s.x << ", " << s.y << ") -> ";
                 if (maze.is_goal(s.x, s.y)) {
                     std::cout << "Goal Reached!" << std::endl;
