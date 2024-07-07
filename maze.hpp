@@ -83,7 +83,6 @@ class Maze {
             return false;
         }
 
-        // return this->obj[x][y] != Wall || this->obj[x][y] != Map_wall;
         return this->obj[x][y] == Empty || this->obj[x][y] == End;
     }
 };

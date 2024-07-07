@@ -7,11 +7,20 @@
 State get_next_state(State s, Actions a) {
     State s_next = s;
     switch (a) {
-        case UP:    s_next.x -= 1; break;
-        case DOWN:  s_next.x += 1; break;
-        case LEFT:  s_next.y -= 1; break;
-        case RIGHT: s_next.y += 1; break;
+        case UP:
+            s_next.x -= 1;
+            break;
+        case DOWN:
+            s_next.x += 1;
+            break;
+        case LEFT:
+            s_next.y -= 1;
+            break;
+        case RIGHT:
+            s_next.y += 1;
+            break;
     }
+
     return s_next;
 }
 

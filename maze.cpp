@@ -30,7 +30,6 @@ void Maze::draw() {
                 DrawRectangle(RECT_SIZE*x, RECT_SIZE*y, RECT_WIDTH, RECT_WIDTH, WHITE);
             } 
             else if (this->obj[x][y] == Player) {
-                //DrawRectangle((RECT_SIZE*x)+15, (RECT_SIZE*y)+15, RECT_WIDTH, RECT_WIDTH, WHITE);
                 DrawCircle((RECT_SIZE*x)+(RECT_SIZE/2), (RECT_SIZE*y)+(RECT_SIZE/2), (float)RECT_WIDTH/3, RED);
             }
             else if (this->obj[x][y] == End) {
@@ -153,7 +152,7 @@ void Maze::move_right() {
     }
     if(this->obj[this->player[0]+1][this->player[1]] == End) {
         std::cout << "VICTORY!\n";
-        // this->randomize_maze();
+        this->randomize_maze();
     }
 }
 
@@ -166,7 +165,7 @@ void Maze::move_left() {
     }
     if(this->obj[this->player[0]-1][this->player[1]] == End) {
         std::cout << "VICTORY!\n";
-        // this->randomize_maze();
+        this->randomize_maze();
     }
 }
 
@@ -179,7 +178,7 @@ void Maze::move_down() {
     }
     if(this->obj[this->player[0]][this->player[1]+1] == End) {
         std::cout << "VICTORY!\n";
-        // this->randomize_maze();
+        this->randomize_maze();
     }
 }
 
@@ -192,7 +191,7 @@ void Maze::move_up() {
     }
     if(this->obj[this->player[0]][this->player[1]-1] == End) {
         std::cout << "VICTORY!\n";
-        // this->randomize_maze();
+        this->randomize_maze();
     }
 }
 
