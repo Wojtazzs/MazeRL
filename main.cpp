@@ -55,7 +55,7 @@ int main() {
     std::cout << "Hello, World!" << std::endl;
     Maze maze;
     Agent solver(0.1, 0.9, 0.1);
-    train_agent(maze, solver, 1000);
+    train_agent(maze, solver, 10000);
     State s = { maze.maze_start[0], maze.maze_start[1] };
     State temp;
     maze.pprint();
